@@ -55,23 +55,26 @@ const APIKEY = "9cf71097";
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [query, setQuery] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [error, setError] = useState("");
 
-  const query = "hsvsjhafscj";
+  const tempQuery = "Interstellar";
 
   useEffect(() => {
     async function fetchMovies(){ 
       try{
         setIsLoading(true);
+        setError('');
         const res = await fetch(`http://www.omdbapi.com/?apikey=${APIKEY}&s=${query}`)
 
         if(!res.ok) throw new Error("Something went wrong with fetching movies");
 
         const data = await res.json();
         if(data.Response === 'False') throw new Error('Movie not found');
+        console.log(data);
         setMovies(data.Search);
       }
       catch(error){
@@ -82,19 +85,24 @@ export default function App() {
         setIsLoading(false);
       }
     }
+    if(query.length < 3){
+      setMovies([]);
+      setError('');
+      return;
+    }
     fetchMovies();
-  }, []);
+  }, [query]);
 
   return (
     <Fragment>
       <Navbar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </Navbar>
       <Main>
         <Box>
           {isLoading && <Loader />}
-          {isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && <MovieList movies={movies} />}
           {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
@@ -155,8 +163,8 @@ function NumResults({movies}){
 }
 
 
-function Search(){
-  const [query, setQuery] = useState("");
+function Search({query, setQuery}){
+  
   return (
     <input
         className="search"
