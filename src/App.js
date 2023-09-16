@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import './App.css';
 import StarRating from "./StarRating";
 import { useMovies } from "./utils/useMovies";
+import { useLocalStorageState } from "./utils/useLocalStorageState";
 
 const APIKEY = "9cf71097";
 
@@ -13,12 +14,8 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
 
   const {movies, isLoading, error} = useMovies(query, handleCloseMovie)
-  
-  //const [watched, setWatched] = useState([]);
-  const [watched, setWatched] = useState(function(){
-    const storedValue = localStorage.getItem('watched')
-    return JSON.parse(storedValue);
-  });
+
+  const [watched, setWatched] = useLocalStorageState([], 'watched');
 
   function handleSelectMovie(id) {
     setSelectedId(selectedId => id === selectedId ? null : id);
@@ -37,10 +34,7 @@ export default function App() {
     setWatched(watched => watched.filter(movie => movie.imdbID !== id));
   }
 
-  useEffect(() => {
-    localStorage.setItem('watched', JSON.stringify(watched))
-  }, [watched])
-
+  
   return (
     <Fragment>
       <Navbar>
